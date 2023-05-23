@@ -15,22 +15,26 @@ def on_new_client(cs, addr):
 To quit just type in quit()
 Have fun communcating!
 """)
-    spam == 0
+    spam = 0
     while True:
         data = cs.recv(1024).decode()
-        if data == "":
+        data = data[:-2]
+        ##Spam Filter if user puts in 5 blanks it kicks them
+        if data == "" :
             print("User has put in a blank")
-            spam = spam + 1
+            spam += 1
             if spam == 5:
                 cs.send(b"""You have put in a blank 5 times.
 Due to our spam policy we must disconnect you.
 You are able to reconnect.
-Good Bye.""")
+Good Bye.
+""")
                 break
         if data == "quit()":
             break
         with clientLock:
-            data = "User:" + username + "> " + data
+            data = "User:" + username + "> " + data + """
+"""
             for c in clients:
                 c.sendall(data.encode())
     cs.close()
@@ -42,7 +46,7 @@ while True:
     conn, addr = s.accept()
     with clientLock:
         clients.add(conn)
-    print("New connection from {addr}" )
+    print(f"New connection from {addr}" )
     thread = Thread(target=on_new_client, args=(conn, addr))
     thread.start()
     
