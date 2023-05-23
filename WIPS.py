@@ -2,8 +2,7 @@ import socket
 from threading import Thread
 import threading
 import os
-HOST = "10.101.129.17"
-##HOST = "192.168.1.123"
+HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
 print(socket.gethostname())
 PORT = 8080
