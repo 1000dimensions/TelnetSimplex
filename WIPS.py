@@ -5,7 +5,7 @@ import os
 HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
 print(socket.gethostname())
-PORT = 8080
+PORT = 9160
 clients = set()
 clientLock = threading.Lock()
 def on_new_client(cs, addr):
@@ -38,6 +38,7 @@ Good Bye.
             for c in clients:
                 c.sendall(data.encode())
     cs.close()
+    clients.remove(cs)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 
