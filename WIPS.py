@@ -12,8 +12,7 @@ print(socket.gethostname())
 PORT = 9160
 clients = set()
 clientLock = threading.Lock()
-q1 = """SELECT username, password FROM 'login' WHERE username = username """
-q2 = """SELECT username, password FROM 'login' WHERE password = password"""
+q1 = """SELECT username, password FROM 'login' WHERE username = ?"""
 #Threading is my favorite
 def create_connection(db_file):
     conn = None
@@ -52,7 +51,7 @@ Otherwise type 'Create Account'""")
         cs.send(b"What is the username? ")
         username = cs.recv(1024).decode()
         username = username[:-2]
-        rs = c.execute(q1)
+        rs = c.execute(q1, (username,))
         print(rs)
         print(username)
         result = rs.fetchall()
@@ -62,33 +61,43 @@ Otherwise type 'Create Account'""")
                 cs.send(b"What is the password?")
                 password = cs.recv(1024).decode()
                 password = password[:-2]
-                rt = c.execute(q2)
-                results = rt.fetchall()
-                for x in result:
-                    if password in x:
-                        
-                        if result == results:
-                            cs.send(b"""Logged in
+                if password in x:
+                    cs.send(b"""Logged in
 """)
-                            print("works")
-                            break
-                if results == result:
+                    print("works")
+                    break
+                else:
+                    print("Attempted login w/ password")
+                    cs.send(b"Incorrect password")
+                    cs.send(b"""Loginning in as Guest
+""")
+                    username = "Guest"
                     break
             else:
                 print("Username incorrect")
                 cs.send(b"Incorrect Username. Does not exist.")
-                cs.send(b"""Logining in as Guest
+                cs.send(b"""Loginning in as Guest
 """)
                 username = "Guest"
-                print("Incorrect username. Loginning in as Guest")
     elif ans == "Create Account":
-        cs.send(b"What is your Username?")
-        username = cs.recv(1024).decode()
-        username = username[:-2]
+        while True:
+            cs.send(b"What is your Username?")
+            username = cs.recv(1024).decode()
+            username = username[:-2]
+            unique = c.execute(q1, (username,))
+            hi = unique.fetchone()
+            print(hi)
+            if hi is not None:
+                print("User already exists")
+                cs.send(b"""Username already exists. Choose another
+                        """)
+            else:
+                break
         cs.send(b"What is your password?")
         password = cs.recv(1024).decode()
         password = password[:-2]
         account = (username, password)
+        
         ten = c.execute(sql_new_account, account)
         conn.commit()
         print(ten)
