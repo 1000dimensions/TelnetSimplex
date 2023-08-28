@@ -9,7 +9,7 @@ db = "login.db"
 HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
 print(socket.gethostname())
-PORT = 9160
+PORT = 21
 clients = set()
 clientLock = threading.Lock()
 q1 = """SELECT username, password FROM 'login' WHERE username = ?"""
