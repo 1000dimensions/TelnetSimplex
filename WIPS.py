@@ -133,39 +133,41 @@ Have fun communcating!
 """)
     spam = 0
     while True:
-        try:
-            data = cs.recv(1024).decode()
-            data = data[:-2]
-        except:
-            print("invalid character")
-            cs.send(b"Invalid Character was submitted. Don't break the server kid")
-        else:
-        ##Spam Filter if user puts in 5 blanks it kicks them
-            if data == "" :
-                print(f"{username} has put in a blank")
-                spam += 1
-                if username == "Guest":
-                    if spam == 2:
-                        cs.send(b"""We are disconnecting you because you are a guest,
+        while True:
+            try:
+                data = cs.recv(1024).decode()
+                data = data[:-2]
+            except:
+                cs.send(b"Invalid Character was submitted. Don't break the server kid")
+                print("Invalid character")
+            else:
+                break
+            ##Spam Filter if user puts in 5 blanks it kicks them
+        if data == "" :
+            print(f"{username} has put in a blank")
+            spam += 1
+            if username == "Guest":
+                if spam == 2:
+                    cs.send(b"""We are disconnecting you because you are a guest,
 and personally I don't trust guests.
 You can relogin, but I recommend creating an account.
 Thanks :)
 """)
-                        break
-                if spam == 5:
-                    cs.send(b"""You have put in a blank 5 times.
+                    break
+            if spam == 5:
+                cs.send(b"""You have put in a blank 5 times.
 Due to our spam policy we must disconnect you.
 You are able to reconnect.
 Good Bye.
 """)
-                    break
-            if data == "quit()":
                 break
-            with clientLock:
-                data = "User:" + username + " > " + data + """
+        if data == "quit()":
+            break
+        with clientLock:
+            data = "User:" + username + " > " + data + """
 """
-                for c in clients:
-                    c.sendall(data.encode())
+            for c in clients:
+                c.sendall(data.encode())
     cs.close()
     clients.remove(cs)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
