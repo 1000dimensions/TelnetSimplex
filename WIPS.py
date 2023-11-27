@@ -3,8 +3,7 @@ from threading import Thread
 import threading
 import sqlite3 as sql
 from sqlite3 import Error
-db = "/Users/1000D/Stuff/login.db"
-db = "C:/Users/jakso/OneDrive/Desktop/New folder/login.db"
+db = "login.db"
 
 HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
