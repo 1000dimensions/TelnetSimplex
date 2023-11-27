@@ -3,13 +3,14 @@ from threading import Thread
 import threading
 import sqlite3 as sql
 from sqlite3 import Error
-db = "login.db"
-
+db = "/Users/1000D/Stuff/login.db"
+db = "C:/Users/jakso/OneDrive/Desktop/New folder/login.db"
 
 HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
 print(socket.gethostname())
-PORT = 21
+PORT = 1026
+
 clients = set()
 clientLock = threading.Lock()
 q1 = """SELECT username, password FROM 'login' WHERE username = ?"""
@@ -48,9 +49,18 @@ Otherwise type 'Create Account'""")
     ans = cs.recv(1024).decode()
     ans = ans[:-2]
     if ans == "Login":
-        cs.send(b"What is the username? ")
-        username = cs.recv(1024).decode()
-        username = username[:-2]
+        
+        while True:
+            try:
+                cs.send(b"What is the username? ")
+                username = cs.recv(1024).decode()
+                username = username[:-2]
+            except:
+                print("Invalid character was submitted")
+                cs.send(b"Invalid character was submitted")
+            else:
+                break
+        
         rs = c.execute(q1, (username,))
         print(rs)
         print(username)
@@ -58,27 +68,34 @@ Otherwise type 'Create Account'""")
         print(result)
         for x in result:
             if username in x:
-                cs.send(b"What is the password?")
-                password = cs.recv(1024).decode()
-                password = password[:-2]
-                if password in x:
-                    cs.send(b"""Logged in
+                while True:
+                    try:
+                        cs.send(b"What is the password?")
+                        password = cs.recv(1024).decode()
+                        password = password[:-2]
+                    except:
+                        print("Invalid Character was inputed")
+                        cs.send(b"Invalid Character was inputed")
+                    else:
+                        break
+                    if password in x:
+                        cs.send(b"""Logged in
 """)
-                    print("works")
-                    break
+                        print("works")
+                        break
+                    else:
+                        print("Attempted login w/ password")
+                        cs.send(b"Incorrect password")
+                        cs.send(b"""Loginning in as Guest
+""")
+                        username = "Guest"
+                        break
                 else:
-                    print("Attempted login w/ password")
-                    cs.send(b"Incorrect password")
+                    print("Username incorrect")
+                    cs.send(b"Incorrect Username. Does not exist.")
                     cs.send(b"""Loginning in as Guest
 """)
                     username = "Guest"
-                    break
-            else:
-                print("Username incorrect")
-                cs.send(b"Incorrect Username. Does not exist.")
-                cs.send(b"""Loginning in as Guest
-""")
-                username = "Guest"
     elif ans == "Create Account":
         while True:
             cs.send(b"What is your Username?")
@@ -111,40 +128,45 @@ Otherwise type 'Create Account'""")
         print("Guest has logged in. Limiting rights.")
 
     cs.send(b"""Welcome to SimplexChat!
-Created By Jakson Vermillion.
+Created By 1000Dimensions.
 To quit just type in quit()
 Have fun communcating!
 """)
     spam = 0
     while True:
-        data = cs.recv(1024).decode()
-        data = data[:-2]
+        try:
+            data = cs.recv(1024).decode()
+            data = data[:-2]
+        except:
+            print("invalid character")
+            cs.send(b"Invalid Character was submitted. Don't break the server kid")
+        else:
         ##Spam Filter if user puts in 5 blanks it kicks them
-        if data == "" :
-            print(f"{username} has put in a blank")
-            spam += 1
-            if username == "Guest":
-                if spam == 2:
-                    cs.send(b"""We are disconnecting you because you are a guest,
+            if data == "" :
+                print(f"{username} has put in a blank")
+                spam += 1
+                if username == "Guest":
+                    if spam == 2:
+                        cs.send(b"""We are disconnecting you because you are a guest,
 and personally I don't trust guests.
 You can relogin, but I recommend creating an account.
 Thanks :)
 """)
-                    break
-            if spam == 5:
-                cs.send(b"""You have put in a blank 5 times.
+                        break
+                if spam == 5:
+                    cs.send(b"""You have put in a blank 5 times.
 Due to our spam policy we must disconnect you.
 You are able to reconnect.
 Good Bye.
 """)
+                    break
+            if data == "quit()":
                 break
-        if data == "quit()":
-            break
-        with clientLock:
-            data = "User:" + username + " > " + data + """
+            with clientLock:
+                data = "User:" + username + " > " + data + """
 """
-            for c in clients:
-                c.sendall(data.encode())
+                for c in clients:
+                    c.sendall(data.encode())
     cs.close()
     clients.remove(cs)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
