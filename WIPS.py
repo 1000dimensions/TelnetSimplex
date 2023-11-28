@@ -3,7 +3,7 @@ from threading import Thread
 import threading
 import sqlite3 as sql
 from sqlite3 import Error
-db = "login.db"
+db = "/login.db/"
 
 HOST = ""
 ##HOST = socket.gethostbyname(socket.gethostname()) 
@@ -47,6 +47,7 @@ def on_new_client(cs, addr):
 Otherwise type 'Create Account'""")
     ans = cs.recv(1024).decode()
     ans = ans[:-2]
+    print(cs)
     if ans == "Login":
         
         while True:
@@ -97,7 +98,7 @@ Otherwise type 'Create Account'""")
                     username = "Guest"
     elif ans == "Create Account":
         while True:
-            cs.send(b"What is your Username?")
+            cs.send(b"What is your Username? ")
             username = cs.recv(1024).decode()
             username = username[:-2]
             unique = c.execute(q1, (username,))
@@ -109,7 +110,7 @@ Otherwise type 'Create Account'""")
                         """)
             else:
                 break
-        cs.send(b"What is your password?")
+        cs.send(b"What is your password? ")
         password = cs.recv(1024).decode()
         password = password[:-2]
         account = (username, password)
@@ -125,7 +126,7 @@ Otherwise type 'Create Account'""")
 """)
         username = "Guest"
         print("Guest has logged in. Limiting rights.")
-
+    
     cs.send(b"""Welcome to SimplexChat!
 Created By 1000Dimensions.
 To quit just type in quit()
@@ -133,6 +134,18 @@ Have fun communcating!
 """)
     spam = 0
     while True:
+        try:
+            cs.send(b" ")
+        except socket.error, e:
+            ##Thanks to mhawke for answering this question https://stackoverflow.com/questions/180095/how-to-handle-a-broken-pipe-sigpipe-in-python
+            if isinstance(e.args, tuple):
+                print("error is" + e[0])
+                if e[0] == errno.EPIPE:
+                    print("Client Disconnected... Removing")
+                    break
+                else:
+                    pass
+    
         while True:
             try:
                 data = cs.recv(1024).decode()
@@ -140,6 +153,7 @@ Have fun communcating!
             except:
                 cs.send(b"Invalid Character was submitted. Don't break the server kid")
                 print("Invalid character")
+                break
             else:
                 break
             ##Spam Filter if user puts in 5 blanks it kicks them
