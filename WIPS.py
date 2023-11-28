@@ -153,6 +153,7 @@ Have fun communcating!
             except:
                 cs.send(b"Invalid Character was submitted. Don't break the server kid")
                 print("Invalid character")
+                k = "Invalid"
                 break
             else:
                 break
@@ -177,9 +178,12 @@ Good Bye.
                 break
         if data == "quit()":
             break
+        if k = "Invalid":
+            break
         with clientLock:
             data = "User:" + username + " > " + data + """
 """
+            print(data)
             for c in clients:
                 c.sendall(data.encode())
     cs.close()
