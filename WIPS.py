@@ -140,8 +140,8 @@ Have fun communcating!
         except socket.error as e:
             ##Thanks to mhawke for answering this question https://stackoverflow.com/questions/180095/how-to-handle-a-broken-pipe-sigpipe-in-python
             if isinstance(e.args, tuple):
-                print("error is" + e[0])
-                if e[0] == errno.EPIPE:
+                print("error is" + e)
+                if e == errno.EPIPE:
                     print("Client Disconnected... Removing")
                     break
                 else:
