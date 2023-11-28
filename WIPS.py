@@ -133,6 +133,7 @@ To quit just type in quit()
 Have fun communcating!
 """)
     spam = 0
+    k = " "
     while True:
         try:
             cs.send(b" ")
