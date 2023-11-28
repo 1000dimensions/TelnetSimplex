@@ -3,6 +3,7 @@ from threading import Thread
 import threading
 import sqlite3 as sql
 from sqlite3 import Error
+import errno
 db = "login.db"
 
 HOST = ""
